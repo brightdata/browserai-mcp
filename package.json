@@ -1,0 +1,28 @@
+{
+    "name": "@browserai/mcp",
+    "version": "1.8.2",
+    "description": "An MCP interface into the BrowserAI toolset",
+    "type": "module",
+    "bin": {
+        "@browserai/mcp": "./server.js"
+    },
+    "keywords": [
+        "mcp",
+        "browserai"
+    ],
+    "author": "BrowserAI",
+    "license": "MIT",
+    "dependencies": {
+        "fastmcp": "^1.27.6",
+        "playwright": "^1.51.1",
+        "zod": "^3.24.2"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "files": [
+        "server.js",
+        "browser_tools.js",
+        "browser_session.js"
+    ]
+}

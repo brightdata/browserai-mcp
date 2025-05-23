@@ -1,0 +1,22 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required:
+      - apiToken
+    properties:
+      apiToken:
+        type: string
+        description: "BrowserAI API token, available in your BrowserAI dashboard"
+      projectName:
+        type: string
+        description: "Optional: The Web Unlocker zone name (defaults to 'Project_1')"
+  commandFunction: |-
+    config => ({ 
+      command: 'node', 
+      args: ['server.js'], 
+      env: { 
+        API_TOKEN: config.apiToken,
+        PROJECT_NAME: config.projectName || 'Project_1'
+      } 
+    })
