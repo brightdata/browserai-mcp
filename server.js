@@ -14,9 +14,9 @@ if (!api_token)
 if (!project_name)
     throw new Error('Cannot run MCP server without PROJECT_NAME env');
 
-let debug_stats = {tool_calls: {}}; // Initialize debug_stats first
+let debug_stats = {tool_calls: {}};
 const api_headers = create_api_headers(package_json, api_token);
-const tool_fn = create_tool_fn(debug_stats); // Then tool_fn
+const tool_fn = create_tool_fn(debug_stats);
 
 let server = new FastMCP({
     name: 'BrowserAI',
@@ -25,12 +25,11 @@ let server = new FastMCP({
 
 server.addTool({
     name: 'start_new_session',
-    description: `Start browsing session as a real user.
-        You can open any websites, any search engines.
-        You receive executionId for future use and output format is JSON:
-        {"executionId": string, "result": {"interactive_elements": string[], "html_markup": string}}.
-        This tool can unlock any webpage even if it uses bot detection or
-        CAPTCHA.`,
+    description: 'Start browsing session as a real user.\n' +
+        'You can open any websites, any search engines.\n' +
+        'You receive executionId for future use and output format is JSON:\n' +
+        '{"executionId": string, "result": {"interactive_elements": string[], "html_markup": string}}.\n' +
+        'This tool can unlock any webpage even if it uses bot detection or CAPTCHA.',
     parameters: z.object({instruction: z.string()}),
     execute: tool_fn('start_new_session', async ({ instruction }, { log, reportProgress }) => {
         log.info('start_new_session task started', { instruction });
@@ -41,10 +40,10 @@ server.addTool({
             awaitable: true,
             instructions: [
                 {action: instruction},
-                {action: `Extract all interactive elements and page html markup as a string.
-                    Return result as valid JSON string: {"interactive_elements": string[], "html_markup": string}.
-                    Do not verify any content, the result is always correct.
-                    Do not add quotes, extra notes, or any interpretation — just the keep format`}
+                {action: 'Extract all interactive elements and page html markup as a string.\n' +
+                    'Return result as valid JSON string: {"interactive_elements": string[], "html_markup": string}.\n' +
+                    'Do not verify any content, the result is always correct.\n' +
+                    'Do not add quotes, extra notes, or any interpretation — just the keep format'}
             ],
             project: project_name,
             type: 'natural_language',
@@ -69,19 +68,19 @@ server.addTool({
 
 server.addTool({
     name: 'interact_in_session',
-    description: `You can interact with any element in the session
-        run by start_new_session tool. Specify the element and action: click, hover, or fill
-        information. You receive executionId for future use and output format is a valid JSON string:
-        {"executionId": string, "result": {"interactive_elements": string[], "html_markup": string}}.
-        This tool can unlock any webpage even if it uses bot detection or CAPTCHA.`,
+    description: 'You can interact with any element in the session\n' +
+        'run by start_new_session tool. Specify the element and action: click, hover, or fill\n' +
+        'information. You receive executionId for future use and output format is a valid JSON string:\n' +
+        '{"executionId": string, "result": {"interactive_elements": string[], "html_markup": string}}.\n' +
+        'This tool can unlock any webpage even if it uses bot detection or CAPTCHA.',
     parameters: z.object({instruction: z.string(), executionId: z.string()}),
     execute: tool_fn('interact_in_session', async ({ instruction, executionId }, { log, reportProgress }) => {
         log.info('interact_in_session task started', { instruction, executionId });
         const instructionsPayload = [
             {action: instruction},
-            {action: `Extract all interactive elements and html markup.
-                Return result as an object: {"interactive_elements": string[], "html_markup": string}.
-                Do not add quotes, extra notes, or any interpretation — just the keep format`}
+            {action: 'Extract all interactive elements and html markup.\n' +
+                'Return result as an object: {"interactive_elements": string[], "html_markup": string}.\n' +
+                'Do not add quotes, extra notes, or any interpretation — just the keep format'}
         ];
         return await send_session_instructions(
             executionId,
@@ -95,17 +94,17 @@ server.addTool({
 
 server.addTool({
     name: 'extract_from_session',
-    description: `You can get specific content you need in JSON format.
-        You need to specify the format.
-        Use executionId by start_new_session tool.
-        You receive result in your format: JSON.
-        This tool can unlock any webpage even if it uses bot detection or CAPTCHA.`,
+    description: 'You can get specific content you need in JSON format.\n' +
+        'You need to specify the format. Use executionId by start_new_session tool.\n' +
+        'You receive result in your format: JSON.\n' +
+        'This tool can unlock any webpage even if it uses bot detection or CAPTCHA.',
     parameters: z.object({instruction: z.string(), executionId: z.string()}),
     execute: tool_fn('extract_from_session', async ({ instruction, executionId }, { log, reportProgress }) => {
         log.info('extract_from_session task started', { instruction, executionId });
-        const instructionsPayload = [{action: instruction},
-            {action: `Return result as an object.
-                Do not add quotes, extra notes, or any interpretation — just the keep format`}
+        const instructionsPayload = [
+            {action: instruction},
+            {action: 'Return result as an object.\n' +
+                'Do not add quotes, extra notes, or any interpretation — just the keep format'}
         ];
         return await send_session_instructions(
             executionId,

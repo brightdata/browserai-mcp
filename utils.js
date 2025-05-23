@@ -15,10 +15,9 @@ export async function poll_task_result(task_id, headers_fn, { log, reportProgres
     while (true)
     {
         const url = `https://browser.ai/api/v1/tasks/${task_id}`;
-        log.info('Polling task result', { url: url, attempt: idx });
         const response = await fetch(url, {method: 'GET', headers: headers_fn()});
         const result_data = await response.json();
-        log.info('Task poll status', { task_id, status: result_data.status, responseData: result_data });
+        log.info('Task poll status', { task_id, status: result_data.status });
         if (typeof reportProgress === 'function') 
             reportProgress({ progress: idx ++, total: 20 });
         if (['finalized', 'awaiting'].includes(result_data.status)) {
@@ -29,7 +28,7 @@ export async function poll_task_result(task_id, headers_fn, { log, reportProgres
             log.error('Task poll failed', { task_id, error: result_data.error });
             throw new Error(`Task ${task_id} failed: ${result_data.error}`);
         }
-        await new Promise(resolve=>setTimeout(resolve, 2000));
+        await new Promise(resolve=>setTimeout(resolve, 3000));
     }
 }
 
