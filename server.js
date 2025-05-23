@@ -3,6 +3,8 @@
 import {FastMCP} from 'fastmcp';
 import {z} from 'zod';
 import { create_api_headers, poll_task_result, send_session_instructions, create_tool_fn } from './utils.js';
+import {createRequire} from 'node:module';
+const require = createRequire(import.meta.url);
 const package_json = require('./package.json');
 const api_token = process.env.API_TOKEN;
 const project_name = process.env.PROJECT_NAME;
