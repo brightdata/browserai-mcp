@@ -3,7 +3,7 @@
 
 ## 🌟 Overview
 
-Welcome to the Browserai Model Context Protocol (MCP) server, designed to enable LLMs, AI agents, and applications to access, discover, and extract web data in real-time. This server empowers MCP clients—such as Claude Desktop, VS Code, Cursor, and Windsurf—to seamlessly search the web, navigate websites, perform actions, and retrieve data efficiently, even from sites with anti-scraping measures.
+Welcome to the Browserai Model Context Protocol (MCP) server, designed to enable LLMs, AI agents, and applications to access, discover, and extract web data in real-time. This server empowers MCP clients—such as Claude Desktop, VS Code, Cursor, and WindSurf—to seamlessly search the web, navigate websites, perform actions, and retrieve data efficiently, even from sites with anti-scraping measures.
 
 ![MCP](https://github.com/user-attachments/assets/b949cb3e-c80a-4a43-b6a5-e0d6cec619a7)
 
