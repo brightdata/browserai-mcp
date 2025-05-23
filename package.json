@@ -14,7 +14,6 @@
     "license": "MIT",
     "dependencies": {
         "fastmcp": "^1.27.6",
-        "playwright": "^1.51.1",
         "zod": "^3.24.2"
     },
     "publishConfig": {
