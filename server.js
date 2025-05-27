@@ -85,7 +85,8 @@ server.addTool({
             body: JSON.stringify(body),
             headers: api_headers(),
         });
-        if (!response.ok) {
+        if (!response.ok) 
+        {
             const errorText = await response.text();
             log.error('Failed to start new session', { status: response.status, statusText: response.statusText, error: errorText });
             throw new Error(`Failed to start new session: ${response.status} ${response.statusText} - ${errorText}`);
@@ -116,7 +117,7 @@ server.addTool({
     }),
     execute: tool_fn('interact_and_extract_in_session', async ({ instruction, executionId, extractData, waitTime }, { log, reportProgress }) => {
         log.info('interact_and_extract_in_session task started', { instruction, executionId, extractData, waitTime });
-        const instructions_payload = [instruction];
+        const instructions_payload = [{action: instruction}];
         if (waitTime > 0) 
             instructions_payload.push({action: `Wait ${waitTime} seconds for the page to update after the interaction`});
         if (extractData) 
@@ -129,7 +130,7 @@ server.addTool({
                     'Do not add any extra text or formatting.'
             });
         }
-        sessionManager.update_activity(executionId); // Update session activity
+        sessionManager.update_activity(executionId);
         return await send_session_instructions(
             executionId,
             instructions_payload,
@@ -150,11 +151,11 @@ server.addTool({
     }),
     execute: tool_fn('extract_from_session', async ({ instruction, executionId }, { log, reportProgress }) => {
         log.info('extract_from_session task started', { instruction, executionId });
-        const instructions_payload = [instruction];
+        const instructions_payload = [{action: instruction}];
         instructions_payload.push({action: 'Return the extracted data as a clean JSON object. ' +
             'No additional text, explanations, or formatting. ' +
             'Just the JSON response as specified in the extraction instruction.'});
-        sessionManager.update_activity(executionId); // Update session activity
+        sessionManager.update_activity(executionId); 
         return await send_session_instructions(
             executionId,
             instructions_payload,
@@ -283,14 +284,14 @@ server.addTool({
     }),
     execute: tool_fn('batch_actions', async ({ actions, executionId, stopOnError, delayBetweenActions }, { log, reportProgress }) => {
         log.info('batch_actions task started', { actionsCount: actions.length, executionId, stopOnError, delayBetweenActions });
-        const instructionsPayload = [];
+        const instructions_payload = [];
         actions.forEach((action, index) => {
-            instructionsPayload.push({action: action});
+            instructions_payload.push({action});
             if (index < actions.length - 1 && delayBetweenActions > 0) {
-                instructionsPayload.push({action: `Wait ${delayBetweenActions} seconds before next action`});
+                instructions_payload.push({action: `Wait ${delayBetweenActions} seconds before next action`});
             }
         });
-        instructionsPayload.push({
+        instructions_payload.push({
             action: 'After completing all actions, extract all clickable elements, input fields, buttons, and links from the final page. ' +
                 'Also get the complete HTML markup. ' +
                 'Return the result as a JSON object with this exact format: ' +
@@ -299,7 +300,7 @@ server.addTool({
         });
         return await send_session_instructions(
             executionId,
-            instructionsPayload,
+            instructions_payload,
             api_headers,
             { log, reportProgress },
             project_name

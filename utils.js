@@ -32,16 +32,16 @@ export async function poll_task_result(task_id, headers_fn, { log, reportProgres
     }
 }
 
-export async function send_session_instructions(executionId, instructionsPayload, headers_fn, { log, reportProgress }, project_name) {
+export async function send_session_instructions(executionId, instructions, headers_fn, { log, reportProgress }, project_name) {
     const url = `https://browser.ai/api/v1/tasks/${executionId}/instructions`;
     const body = {
         geoLocation: {country: 'US'},
         awaitable: true,
-        instructions: instructionsPayload,
+        instructions,
         project: project_name,
         type: 'natural_language',
     };
-    log.info('Sending instructions to session', { url, executionId, instructionsCount: instructionsPayload.length });
+    log.info('Sending instructions to session', { url, executionId, instructionsCount: instructions.length });
     let response = await fetch(url, {
         method: 'POST',
         body: JSON.stringify(body),
