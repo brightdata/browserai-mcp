@@ -1,6 +1,6 @@
 {
     "name": "@brightdata/browserai-mcp",
-    "version": "1.8.5",
+    "version": "1.8.7",
     "description": "An MCP interface into the BrowserAI toolset",
     "type": "module",
     "bin": {

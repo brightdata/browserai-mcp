@@ -47,21 +47,25 @@ export async function send_session_instructions(executionId, instructionsPayload
         body: JSON.stringify(body),
         headers: headers_fn(),
     });
-    
-    if (!response.ok) {
-        const errorText = await response.text();
-        log.error('Failed to send instructions', { status: response.status, statusText: response.statusText, error: errorText });
-        throw new Error(`Failed to send instructions: ${response.status} ${response.statusText} - ${errorText}`);
+    if (!response.ok) 
+    {
+        const error = await response.text();
+        log.error('Failed to send instructions', { status: response.status, statusText: response.statusText, error });
+        throw new Error(`Failed to send instructions: ${response.status} ${response.statusText} - ${error}`);
     }
-    
     const data = await response.json();
     const task_id = data.executionId;
-    
     await new Promise(resolve=>setTimeout(resolve, 1000));
     log.info('Received task ID from API after sending instructions', { task_id, responseData: data });
-    if (task_id) {
+    if (task_id) 
+    {
         let result = await poll_task_result(task_id, headers_fn, { log, reportProgress });
-        return JSON.stringify({executionId: task_id, result});
+        return {
+            content: [{
+                type: "text",
+                text: JSON.stringify({executionId: task_id, result}, null, 2)
+            }]
+        };
     }
     log.error('No task_id received after sending instructions', { responseData: data });
     throw new Error('No task ID received from API after sending instructions');

@@ -62,7 +62,8 @@ server.addTool({
         const url = 'https://browser.ai/api/v1/tasks';
         const method = 'POST';
         const instructions = [{action: instruction}];
-        if (extractData) {
+        if (extractData) 
+        {
             instructions.push({
                 action: 'Extract all clickable elements, input fields, buttons, and links from the page. ' +
                     'Also get the complete HTML markup. ' +
@@ -105,22 +106,23 @@ server.addTool({
 server.addTool({
     name: 'interact_and_extract_in_session',
     description: 'Interact with elements in an existing browser session. ' +
-        'Provide instructions like "Click the login button", "Fill email field with test@example.com", or "Scroll down". ' +
-        'Returns updated page data after the interaction.',
+        'Provide an array of instructions like ["Click the login button", "Fill email field with test@example.com", "Scroll down"]. ' +
+        'Returns updated page data after the interactions.',
     parameters: z.object({
-        instruction: z.string(),
+        instructions: z.array(z.string()),
         executionId: z.string(),
         extractData: z.boolean().optional().default(true),
         waitTime: z.number().optional().default(2)
     }),
-    execute: tool_fn('interact_and_extract_in_session', async ({ instruction, executionId, extractData, waitTime }, { log, reportProgress }) => {
-        log.info('interact_and_extract_in_session task started', { instruction, executionId, extractData, waitTime });
-        const instructions_payload = [{action: instruction}];
+    execute: tool_fn('interact_and_extract_in_session', async ({ instructions, executionId, extractData, waitTime }, { log, reportProgress }) => {
+        log.info('interact_and_extract_in_session task started', { instructions, executionId, extractData, waitTime });
+        const instructions_payload = instructions.map(action => ({action}));
         if (waitTime > 0) 
             instructions_payload.push({action: `Wait ${waitTime} seconds for the page to update after the interaction`});
-        if (extractData) {
+        if (extractData) 
+        {
             instructions_payload.push({
-                action: 'After performing the action, extract all clickable elements, input fields, buttons, and links from the current page. ' +
+                action: 'After performing the actions, extract all clickable elements, input fields, buttons, and links from the current page. ' +
                     'Also get the complete HTML markup. ' +
                     'Return the result as a JSON object with this exact format: ' +
                     '{"interactive_elements": ["element1", "element2", ...], "html_markup": "complete_html_string"}. ' +
@@ -141,21 +143,21 @@ server.addTool({
 server.addTool({
     name: 'extract_from_session',
     description: 'Extract specific data from the current page in a browser session. ' +
-        'Provide detailed instructions about what data to extract and in what format, ' +
-        'e.g., "Extract all product names and prices as JSON array" or "Get the page title and meta description".',
-    parameters: z.object({instruction: z.string(), executionId: z.string()}),
-    execute: tool_fn('extract_from_session', async ({ instruction, executionId }, { log, reportProgress }) => {
-        log.info('extract_from_session task started', { instruction, executionId });
-        const instructionsPayload = [
-            {action: instruction},
-            {action: 'Return the extracted data as a clean JSON object. ' +
-                'No additional text, explanations, or formatting. ' +
-                'Just the JSON response as specified in the extraction instruction.'}
-        ];
+        'Provide an array of extraction instructions, e.g., ["Extract all product names and prices as JSON array", "Get the page title and meta description"].',
+    parameters: z.object({
+        instructions: z.array(z.string()),
+        executionId: z.string()
+    }),
+    execute: tool_fn('extract_from_session', async ({ instructions, executionId }, { log, reportProgress }) => {
+        log.info('extract_from_session task started', { instructions, executionId });
+        const instructions_payload = instructions.map(action => ({action}));
+        instructions_payload.push({action: 'Return the extracted data as a clean JSON object. ' +
+            'No additional text, explanations, or formatting. ' +
+            'Just the JSON response as specified in the extraction instruction.'});
         sessionManager.update_activity(executionId); // Update session activity
         return await send_session_instructions(
             executionId,
-            instructionsPayload,
+            instructions_payload,
             api_headers,
             { log, reportProgress },
             project_name
