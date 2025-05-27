@@ -41,23 +41,30 @@ export async function send_session_instructions(executionId, instructionsPayload
         project: project_name,
         type: 'natural_language',
     };
-    log.info('Sending instructions to session', { url, body });
+    log.info('Sending instructions to session', { url, executionId, instructionsCount: instructionsPayload.length });
     let response = await fetch(url, {
         method: 'POST',
         body: JSON.stringify(body),
         headers: headers_fn(),
     });
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        log.error('Failed to send instructions', { status: response.status, statusText: response.statusText, error: errorText });
+        throw new Error(`Failed to send instructions: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+    
     const data = await response.json();
     const task_id = data.executionId;
+    
     await new Promise(resolve=>setTimeout(resolve, 1000));
     log.info('Received task ID from API after sending instructions', { task_id, responseData: data });
-    if (task_id)
-    {
+    if (task_id) {
         let result = await poll_task_result(task_id, headers_fn, { log, reportProgress });
         return JSON.stringify({executionId: task_id, result});
     }
     log.error('No task_id received after sending instructions', { responseData: data });
-    return data;
+    throw new Error('No task ID received from API after sending instructions');
 }
 
 export function create_tool_fn(debug_stats) {
