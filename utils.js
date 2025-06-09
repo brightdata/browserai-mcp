@@ -39,7 +39,7 @@ export async function send_session_instructions(executionId, instructions, heade
         awaitable: true,
         instructions,
         project: project_name,
-        type: 'natural_language',
+        type: 'crawler_automation',
     };
     log.info('Sending instructions to session', { url, executionId, instructionsCount: instructions.length });
     let response = await fetch(url, {
