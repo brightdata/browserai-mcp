@@ -10,22 +10,51 @@ export function create_api_headers(package_json, api_token) {
     };
 }
 
-export async function poll_task_result(task_id, headers_fn, { log, reportProgress }) {
+function loading_progress(idx) {
+    if (idx < 10) return idx * (Math.floor(Math.random() * 4) + 2);
+    if (idx < 20) return 50 + (idx - 10) * 3; 
+    if (idx < 25) return 80 + (idx - 20) * 2; 
+    if (idx < 32) return 90 + (idx - 25) * 1; 
+    return 99;
+}
+
+export async function poll_task_result(task_id, headers_fn, { log, reportProgress, instructions }) {
     let idx = 0;
+    const startTime = Date.now();
     while (true)
     {
         const url = `https://browser.ai/api/v1/tasks/${task_id}`;
+        const instruction = instructions[0]?.action || 'unknown';
         const response = await fetch(url, {method: 'GET', headers: headers_fn()});
         const result_data = await response.json();
-        log.info('Task poll status', { task_id, status: result_data.status });
+        log.info(`Executing instruction "${instruction}". Status: ${result_data.status}. Progress: ${loading_progress(idx)}%, Time: ${elapsed_sec}s`);
+        const elapsed_sec = Math.floor((Date.now() - startTime) / 1000);
         if (typeof reportProgress === 'function') 
-            reportProgress({ progress: idx ++, total: 20 });
-        if (['finalized', 'awaiting'].includes(result_data.status)) {
-            log.info(`Task ${result_data.status}`, { task_id, result: result_data.result });
+        {
+            reportProgress({ 
+                progress: `${idx++}`, 
+                total: `100`, 
+                message: `Executing instruction "${instruction}". Status: ${result_data.status}. Progress: ${loading_progress(idx)}%, Time: ${elapsed_sec}s`     
+            });
+        }
+        if (['finalized', 'awaiting', 'stopped'].includes(result_data.status)) 
+        {
+            reportProgress({ 
+                progress: 100, 
+                total: 100, 
+                message: `Task "${instruction}" successfully completed. Execution time: ${elapsed_sec}s`
+            });
+            log.info(`Task "${instruction}" successfully completed. Execution time: ${elapsed_sec}s`, { task_id, result: result_data.result });
             return result_data.result;
         }
-        if (result_data.status == 'failed') {
+        if (result_data.status == 'failed') 
+        {
             log.error('Task poll failed', { task_id, error: result_data.error });
+            reportProgress({ 
+                progress: 100, 
+                total: 100, 
+                message: `Task "${instruction}" failed.`
+            });
             throw new Error(`Task ${task_id} failed: ${result_data.error}`);
         }
         await new Promise(resolve=>setTimeout(resolve, 3000));
@@ -59,7 +88,7 @@ export async function send_session_instructions(executionId, instructions, heade
     log.info('Received task ID from API after sending instructions', { task_id, responseData: data });
     if (task_id) 
     {
-        let result = await poll_task_result(task_id, headers_fn, { log, reportProgress });
+        let result = await poll_task_result(task_id, headers_fn, { log, reportProgress, instructions });
         return {
             content: [{
                 type: "text",

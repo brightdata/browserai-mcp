@@ -97,7 +97,7 @@ server.addTool({
         if (task_id) 
         {
             sessionManager.track_session(task_id);
-            let result = await poll_task_result(task_id, api_headers, { log, reportProgress });
+            let result = await poll_task_result(task_id, api_headers, { log, reportProgress, instructions });
             return JSON.stringify({executionId: task_id, result});
         }
         throw new Error('No execution ID received from API');
