@@ -77,7 +77,7 @@ server.addTool({
             awaitable: true,
             instructions,
             project: project_name,
-            type: 'natural_language',
+            type: 'crawler_automation',
         };
         log.info('Fetching URL', { url, method, instructionsCount: body.instructions.length });
         let response = await fetch(url, {
