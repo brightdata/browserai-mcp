@@ -27,8 +27,8 @@ export async function poll_task_result(task_id, headers_fn, { log, reportProgres
         const instruction = instructions[0]?.action || 'unknown';
         const response = await fetch(url, {method: 'GET', headers: headers_fn()});
         const result_data = await response.json();
-        log.info(`Executing instruction "${instruction}". Status: ${result_data.status}. Progress: ${loading_progress(idx)}%, Time: ${elapsed_sec}s`);
         const elapsed_sec = Math.floor((Date.now() - startTime) / 1000);
+        log.info(`Executing instruction "${instruction}". Status: ${result_data.status}. Progress: ${loading_progress(idx)}%, Time: ${elapsed_sec}s`);
         if (typeof reportProgress === 'function') 
         {
             reportProgress({ 
