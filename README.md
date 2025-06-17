@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/brightdata-browserai-mcp-badge.png)](https://mseep.ai/app/brightdata-browserai-mcp)
+
 <h1 align="center">Browserai MCP</h1>
 <h3 align="center">Empower AI Agents with Real-Time Web Data</h3>
 
